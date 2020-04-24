@@ -1,0 +1,44 @@
+html { font-size: 62.5%; } 
+body { 	margin: 0px; padding: 0px; }
+#jeu {
+	background-color:#BBADA0;
+	display: block;
+	margin: 100px auto;
+	width: 460px;
+	height:460px;
+	border-radius: 10px;
+	padding-top: 10px;
+}
+#commande {
+	height:30px;
+	position: absolute;
+	left : 410px;
+}
+.ligne {
+	margin: 0 10px;
+}
+.case {
+	border-style:solid;
+	border-width:4px;
+	border-color: #BBADA0;
+	border-radius: 8px;
+	background-color:#CDC1B4;
+	width: 100px;	
+	height:100px;
+	display: inline-block;
+	vertical-align: top;
+	z-index:1;  
+	transition-property : top, left;
+	transition-duration : 1s;
+	text-align: center;	
+	font-size: 50px;
+	line-height: 100px;
+	margin-top: 4px;
+	font-weight: bold;
+	font-family: 'Arial', sans-serif;
+	color: #776e65;
+}
+.new {
+	color : red;
+}
+.videold { 	background-color:#BBADA0; z-index:0; border:none}
