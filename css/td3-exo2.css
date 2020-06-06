@@ -39,6 +39,6 @@ body { 	margin: 0px; padding: 0px; }
 	color: #776e65;
 }
 .new {
-	color : red;
+	color : darkred;
 }
 .videold { 	background-color:#BBADA0; z-index:0; border:none}

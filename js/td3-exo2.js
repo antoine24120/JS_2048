@@ -1,4 +1,5 @@
 let grille = [] //global variable
+let lastCase = []
 
 function init(){
     for (let i = 0; i <= 3; i++) { // i = ligne
@@ -22,55 +23,182 @@ class maCase {
     }
 }
 
-function insertionValeur() { //insertion 2 valeurs random à l'initialisation
-    rand1 = MathRandomInt(0, 3)
-    rand2 = MathRandomInt(0, 3)
-    grille[rand1][rand2].value = Math.random() < 0.9 ? 2 : 4
+function insertionValeur() {
+    let case_vide = obtenirCaseVide()
+    if (Array.isArray((case_vide))) {
+        grille[case_vide[0]][case_vide[1]].value = obtenirNouvelleValeur()
+        lastCase = [case_vide[0], case_vide[1]]
+    }
+}
 
+function obtenirNouvelleValeur() {
+    return Math.random() < 0.9 ? 2 : 4
+}
+
+function obtenirCaseVide() {
+    let cases_vide = []
+    for (let i = 0; i <= 3; i++) { // i = ligne
+        for (let j = 0; j <= 3; j++) { // j = colonne
+            if (!grille[i][j].value) {
+                cases_vide.push([i,j]) //stockage des cases vides dans tableau temporaire
+            }
+        }
+    }
+    return cases_vide[MathRandomInt(0, cases_vide.length - 1)] //choix d'une case random du tableau de cases vide
 }
 
 function actionClavier(e) {
-    if (e.keyCode === 38) { //up
-        deplacementVersHaut()
+    switch (e.keyCode) {
+        case 38: deplacementVersHaut(); break
+        case 40: deplacementVersBas(); break
+        case 37: deplacementVersGauche(); break
+        case 39: deplacementVersDroite(); break
     }
-    else if (e.keyCode === 40) { //down
-        deplacementVersBas()
-    }
-    else if (e.keyCode === 37) { //left
-        deplacementVersGauche()
-    }
-    else if (e.keyCode === 39) { //right
-        deplacementVersDroite()
+    if (estVictoire()) {
+        alert("Bravo, vous avez gagner !")
+    } else if (estDefaite()) {
+        alert("Echec !")
     }
 }
 
 function deplacementVersHaut() {
-    //TODO
+    tasserVertical(true)
+    fusionVertical(true)
+    insertionValeur()
+    afficherGrille()
 }
 
 function deplacementVersBas() {
-    //TODO
+    tasserVertical(false)
+    fusionVertical(false)
+    insertionValeur()
+    afficherGrille()
 }
 
 function deplacementVersGauche() {
-    //TODO
+    tasserHorizontale(true)
+    fusionHorizontale(true)
+    insertionValeur()
+    afficherGrille()
 }
 
 function deplacementVersDroite() {
-    for (let i = 0; i <= 3; i++) { // i = ligne
-        if (!emptyLine(i)) { //
-            //TODO::tout decaller à droite
+    tasserHorizontale(false)
+    fusionHorizontale(false)
+    insertionValeur()
+    afficherGrille()
+}
 
-            //pour chaque colonne decroissant, si vide on cherche la valeur la plus proche, on ramene a droite
-
-
-
-
-            //fusionner les cases de meme valeur
-
-            //supprimer les blancs generé
+function tasserHorizontale(gauche) {
+    let move = false
+    for (let i = 0; i <= 3; i++) { //pour chaque ligne
+        if (!estLigneVide(i)) { //si ligne non vide
+            for (let repeat = 0; repeat <= 2; repeat++) { //repetition max du decallage des cases
+                if (gauche) {
+                    for (let j = 0; j < 3; j++) { //pour chaque colonnes
+                        if (!grille[i][j].value && grille[i][j+1].value) { //si valeur colonne null & colonne suivante non null
+                            grille[i][j].value = grille[i][j+1].value; //echange de valeur
+                            grille[i][j+1].value = null; //echange de valeur
+                            move = true
+                        }
+                    }
+                } else { //droite
+                    for (let j = 3; j > 0; j--) { //pour chaque colonnes
+                        if (!grille[i][j].value && grille[i][j-1].value) { //si valeur colonne null & colonne suivante non null
+                            grille[i][j].value = grille[i][j-1].value; //echange de valeur
+                            grille[i][j-1].value = null; //echange de valeur
+                            move = true
+                        }
+                    }
+                }
+            }
         }
     }
+    return move
+}
+
+function tasserVertical(haut) {
+    let move = false
+    for (let j = 0; j <= 3; j++) { //pour chaque colonnes
+        if (!estColonneVide(j)) { //si colonne non vide
+            for (let repeat = 0; repeat <= 2; repeat++) { //repetition max du decallage des cases
+                if (haut) {
+                    for (let i = 0; i < 3; i++) { //pour chaque lignes
+                        if (!grille[i][j].value && grille[i+1][j].value) { //si valeur colonne null & colonne suivante non null
+                            grille[i][j].value = grille[i+1][j].value; //echange de valeur
+                            grille[i+1][j].value = null; //echange de valeur
+                            move = true
+                        }
+                    }
+                } else { //bas
+                    for (let i = 3; i > 0; i--) { //pour chaque lignes
+                        if (!grille[i][j].value && grille[i-1][j].value) { //si valeur colonne null & colonne suivante non null
+                            grille[i][j].value = grille[i-1][j].value; //echange de valeur
+                            grille[i-1][j].value = null; //echange de valeur
+                            move = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return move
+}
+
+function fusionHorizontale(gauche) {
+    let move = false
+    for (let i = 0; i <= 3; i++) {
+        if (!estLigneVide(i)) {
+            for (let repeat = 0; repeat <= 2; repeat++) {
+                if (gauche) {
+                    for (let j = 0; j < 3; j++) {
+                        if (grille[i][j].value && grille[i][j].value === grille[i][j+1].value) {
+                            grille[i][j].value = grille[i][j].value*2
+                            grille[i][j+1].value = null;
+                            move = true
+                        }
+                    }
+                } else { //droite
+                    for (let j = 3; j > 0; j--) { //pour chaque colonnes
+                        if (grille[i][j].value && grille[i][j].value === grille[i][j-1].value) { //si valeur colonne null & colonne suivante non null
+                            grille[i][j].value = grille[i][j].value*2 //echange de valeur
+                            grille[i][j-1].value = null;
+                            move = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return move
+}
+
+function fusionVertical(haut) {
+    let move = false
+    for (let j = 0; j <= 3; j++) { //pour chaque colonnes
+        if (!estColonneVide(j)) { //si colonne non vide
+            for (let repeat = 0; repeat <= 2; repeat++) { //repetition max du decallage des cases
+                if (haut) {
+                    for (let i = 0; i < 3; i++) { //pour chaque lignes
+                        if (grille[i][j].value && grille[i][j].value === grille[i+1][j].value) { //si valeur colonne null & colonne suivante non null
+                            grille[i][j].value = grille[i][j].value*2; //echange de valeur
+                            grille[i+1][j].value = null; //echange de valeur
+                            move = true
+                        }
+                    }
+                } else { //bas
+                    for (let i = 3; i > 0; i--) { //pour chaque lignes
+                        if (grille[i][j].value && grille[i][j].value === grille[i-1][j].value) { //si valeur colonne null & colonne suivante non null
+                            grille[i][j].value = grille[i][j].value*2; //echange de valeur
+                            grille[i-1][j].value = null; //echange de valeur
+                            move = true
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return move
 }
 
 function afficherGrille() {
@@ -79,29 +207,59 @@ function afficherGrille() {
     for (let i = 0; i <= 3; i++) { // i = ligne
         for (let j = 0; j <= 3; j++) { // j = colonne
             cases[actualCase].innerHTML = grille[i][j].value
+            cases[actualCase].classList.remove('new')
+            if (lastCase[0] === i && lastCase[1] === j) {
+                cases[actualCase].classList.add('new') //last case
+            } else {
+                cases[actualCase].classList.remove('new') //last case
+            }
             actualCase++
         }
     }
 }
+
+function estLigneVide(line) {
+    for (let j = 0; j <= 3; j++) { //pour chaque colonne
+        if(grille[line][j].value) { //si une colonne est pas vide
+            return false //direct return false
+        }
+    }
+    return true //sinon return true
+}
+
+function estColonneVide(column) {
+    for (let i = 0; i <= 3; i++) { //pour chaque colonne
+        if(grille[i][column].value) { //si une colonne est pas vide
+            return false //direct return false
+        }
+    }
+    return true //sinon return true
+}
+
+function estVictoire() {
+    for (let i = 0; i <= 3; i++) { // i = ligne
+        for (let j = 0; j <= 3; j++) { // j = colonne
+            if (grille[i][j].value === 2048) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function estDefaite() {
+    for (let i = 0; i <= 3; i++) { // i = ligne
+        for (let j = 0; j <= 3; j++) { // j = colonne
+            if (grille[i][j].value !== null) {
+                return false; //s'il y a de la place on continu
+            }
+        }
+    }
+    return true;
+}
+
 /*************************************************************/
+
 function MathRandomInt(min, max) {
     return Math.floor(Math.random() * (max+1)) + (min)
-}
-
-function emptyLine(line) {
-    for (let j = 0; j <= 3; j++) { //pour chaque colonne
-        if(grille[line][j].value !== null) { //si une colonne est pas vide
-            return false //direct return false
-        }
-    }
-    return true //sinon return true
-}
-
-function emptyColumn(column) {
-    for (let i = 0; i <= 3; i++) { //pour chaque colonne
-        if(grille[i][column].value !== null) { //si une colonne est pas vide
-            return false //direct return false
-        }
-    }
-    return true //sinon return true
 }
